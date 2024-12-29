@@ -1,5 +1,12 @@
 from typing import MutableMapping
+
+from pydantic import BaseModel, Field
 from pizza_client.logger import LogLevels
+
+
+class LLMClientConfigInput(BaseModel):
+    log_level: LogLevels = Field(LogLevels.INFO, type=LogLevels, title="The log level for the client")
+    polling_interval: float = 0.1
 
 
 class LLMClientConfig(MutableMapping):
@@ -9,8 +16,8 @@ class LLMClientConfig(MutableMapping):
         'polling_interval': 0.1
     }
 
-    def __init__(self, config):
-        self.config = self.fill_missing(config)
+    def __init__(self, config : LLMClientConfigInput):
+        self.config = self.fill_missing(config.model_dump())
 
     def fill_missing(self, config):
         for key in self.defaults:

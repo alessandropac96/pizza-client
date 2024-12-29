@@ -2,11 +2,12 @@ import asyncio
 from typing import Callable, Dict
 import unittest
 from pizza_client import LLMClient, LogLevels, ConnectionStatus, OpenAIMockClient
+from pizza_client.client import LLMClientConfigInput
 
 class TestAbstractLLMClient(unittest.TestCase):
 
     def setUp(self):
-        config = {"log_level": LogLevels.DEBUG, 'polling_interval': 0.1}
+        config = LLMClientConfigInput(log_level=LogLevels.DEBUG, polling_interval=0.1)
         self.client = OpenAIMockClient(config)
         self.loop = asyncio.get_event_loop()
 
@@ -55,7 +56,7 @@ class TestErrorHandler(unittest.TestCase):
 
 
     def setUp(self):
-        config = {"log_level": LogLevels.DEBUG, 'polling_interval': 0.1}
+        config = LLMClientConfigInput(log_level=LogLevels.DEBUG, polling_interval=0.1)
         self.client = FailingClient(config)
         self.loop = asyncio.get_event_loop()
 

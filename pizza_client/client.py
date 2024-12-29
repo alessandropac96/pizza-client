@@ -3,12 +3,13 @@ import asyncio
 from functools import wraps
 from typing import Callable, Dict
 import unittest
-from pizza_client.config import LLMClientConfig
+from pizza_client.config import LLMClientConfig, LLMClientConfigInput
 from pizza_client.logger import Logger
 from openai import OpenAI
 from enum import Enum
 from .exceptions import ConnectionError, InternalConnectionError
 from pizza_client.logger import LogLevels
+from pydantic import BaseModel, Field
 
 class ConnectionStatus(Enum):
     CONNECTED = 1
@@ -17,7 +18,8 @@ class ConnectionStatus(Enum):
     DISCONNECTING = 4
     FAILED = 5
 
-
+class QueryInput(BaseModel):
+    query: str = Field(...,min_length=10, title="The query to be sent to the LLM")
 
 class LLMClient(ABC):
     _connectionStatus = ConnectionStatus.DISCONNECTED
@@ -27,28 +29,6 @@ class LLMClient(ABC):
     error_fallbacks : Dict[Exception, Callable[[], None]] = {}
     _last_connection_result = None
 
-    # def error_handler(func):
-    #     """Decorator to handle errors in LLM client methods."""
-    #     @wraps(func)
-    #     def wrapper(self,*args, **kwargs):
-    #         try:
-    #             self._logger.debug("Calling %s", func.__name__)
-    #             return func(self,*args, **kwargs)
-    #         except Exception as e:
-    #             # if custom_exception != None:
-    #             #     if custom_exception in self.error_fallbacks:
-    #             #         self.error_fallbacks[custom_exception]()
-    #             #     else:
-    #             #         self._logger.error("Error in %s: %s", func.__name__, e)
-    #             # else: 
-    #                 self._logger.error("Error in %s: %s", func.__name__, e)
-    #                 if e.__class__ in self.error_fallbacks:
-    #                     self.error_fallbacks[e.__class__]()
-    #                 else:
-    #                     self._logger.error("Error in %s: %s", func.__name__, e)
-    #                 return None 
-    #     return wrapper
-
     def handle_exception(self, func,  e : Exception):
         self._logger.error("Error in %s: %s", func.__name__, e)
         if e.__class__ in self.error_fallbacks:
@@ -57,7 +37,7 @@ class LLMClient(ABC):
             self._logger.error("Error in %s: %s", func.__name__, e)
         return None
     
-    def error_handler(func):
+    def error_handler(func : Callable):
         """Decorator to handle errors in LLM client methods."""
         if asyncio.iscoroutinefunction(func):
             @wraps(func)
@@ -65,12 +45,6 @@ class LLMClient(ABC):
                 try:
                     return await func(self, *args, **kwargs)
                 except Exception as e:
-                    # if custom_exception != None:
-                #     if custom_exception in self.error_fallbacks:
-                #         self.error_fallbacks[custom_exception]()
-                #     else:
-                #         self._logger.error("Error in %s: %s", func.__name__, e)
-                # else: 
                     return self.handle_exception(func, e) 
                 
             return wrapper
@@ -83,7 +57,7 @@ class LLMClient(ABC):
                     return self.handle_exception(func, e)
             return wrapper
     
-    def __init__(self, config : Dict):
+    def __init__(self, config : LLMClientConfigInput):
         self._loop = asyncio.get_event_loop()
         self._config = LLMClientConfig(config)
         log_level = config['log_level'] if 'log_level' in config else LogLevels.INFO
@@ -91,12 +65,12 @@ class LLMClient(ABC):
         return
     
     @abstractmethod
-    def configure(self, config):
+    def configure(self, config : LLMClientConfigInput):
         return
 
     @abstractmethod
     @error_handler
-    async def query_llm(self, query):
+    async def query_llm(self, query : QueryInput):
         return
 
     # --- CONNECTION MANAGER (should be moved into a class later) ---

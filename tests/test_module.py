@@ -2,7 +2,7 @@ import asyncio
 from typing import Callable, Dict
 import unittest
 from pizza_client import LLMClient, LogLevels, ConnectionStatus, OpenAIMockClient
-from pizza_client.client import LLMClientConfigInput
+from pizza_client.client import LLMClientConfigInput, TemperatureInput
 
 class TestAbstractLLMClient(unittest.TestCase):
 
@@ -31,8 +31,8 @@ class TestAbstractLLMClient(unittest.TestCase):
     def test_query_llm(self):
         async def run_test():
             await self.client.connect()
-            response = await self.client.query_llm("Hello, world!", 0.5)
-            self.assertEqual(response, "This is a mock response, based on the query: Hello, world!")
+            response = await self.client.query_llm("Hello, world!", temperature=TemperatureInput(temperature=0.5))
+            self.assertEqual(response, "This is a mock response, based on the query: Hello, world! and temperature: 0.5")
         self.loop.run_until_complete(run_test())
 
 def critical_error():

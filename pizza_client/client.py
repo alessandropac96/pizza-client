@@ -18,9 +18,14 @@ class ConnectionStatus(Enum):
     DISCONNECTING = 4
     FAILED = 5
 
+class TemperatureInput(BaseModel):
+    temperature: float = Field(...,ge=0, le=1, title="The temperature for the query")
+
 class QueryInput(BaseModel):
     query: str = Field(...,min_length=10, title="The query to be sent to the LLM")
 
+class QueryResponse(BaseModel):
+    response: str = Field(..., title="The response from the LLM")
 class LLMClient(ABC):
     _connectionStatus = ConnectionStatus.DISCONNECTED
     _config = None
@@ -185,7 +190,7 @@ class OpenAIMockClient(LLMClient):
     
     async def query_llm(self, query, temperature):
         self._logger.debug("Querying OpenAI with: " + str(query) + " and temperature: " + str(temperature))
-        return "This is a mock response, based on the query: " + str(query) + " and temperature: " + str(temperature)
+        return QueryResponse(response="This is a mock response, based on the query: " + str(query) + " and temperature: " + str(temperature))
     
 class AnthropicMockClient(LLMClient):
     
@@ -215,7 +220,7 @@ class AnthropicMockClient(LLMClient):
     
     async def query_llm(self, query, temperature):
         self._logger.debug("Querying Anthropic with: " + str(query) + " and temperature: " + str(temperature))
-        return "This is a mock response, based on the query: " + str(query) + " and temperature: " + str(temperature)
+        return QueryResponse(response="This is a mock response, based on the query: " + str(query) + " and temperature: " + str(temperature))
 
 
 

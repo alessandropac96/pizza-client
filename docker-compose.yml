@@ -1,0 +1,9 @@
+
+
+services:
+  pizza-client:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app

@@ -70,7 +70,7 @@ class LLMClient(ABC):
 
     @abstractmethod
     @error_handler
-    async def query_llm(self, query : QueryInput):
+    async def query_llm(self, query : QueryInput, temperature : float):
         return
 
     # --- CONNECTION MANAGER (should be moved into a class later) ---
@@ -183,9 +183,9 @@ class OpenAIMockClient(LLMClient):
         self._config = config
         return
     
-    async def query_llm(self, query):
-        self._logger.debug("Querying OpenAI with: " + str(query))
-        return "This is a mock response, based on the query: " + str(query)
+    async def query_llm(self, query, temperature):
+        self._logger.debug("Querying OpenAI with: " + str(query) + " and temperature: " + str(temperature))
+        return "This is a mock response, based on the query: " + str(query) + " and temperature: " + str(temperature)
     
 class AnthropicMockClient(LLMClient):
     
@@ -213,9 +213,9 @@ class AnthropicMockClient(LLMClient):
         self._config = config
         return
     
-    async def query_llm(self, query):
-        self._logger.debug("Querying Anthropic with: " + str(query))
-        return "This is a mock response, based on the query: " + str(query)
+    async def query_llm(self, query, temperature):
+        self._logger.debug("Querying Anthropic with: " + str(query) + " and temperature: " + str(temperature))
+        return "This is a mock response, based on the query: " + str(query) + " and temperature: " + str(temperature)
 
 
 

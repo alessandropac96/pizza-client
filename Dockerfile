@@ -1,5 +1,3 @@
-FROM alpine AS build
-RUN apk add --no-cache curl
 FROM python:3.12-slim
 
 # Set the working directory in the container
@@ -15,4 +13,4 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Run the unit tests
-CMD ["python3", "-m", "unittest", "tests/test_module.py"]
+CMD ["python3", "-m", "unittest", "pizza_client/tests/test_module.py"]
